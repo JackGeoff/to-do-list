@@ -1,6 +1,6 @@
 To-do-list 
 
-This is a simple website where the user can get to input tasks. Once done the user can mark it as done or delete it.
+This is a Task tracker website where the user can get to input tasks. Once done the user can mark it as done or delete it.The website is mainly made up of javascript to create and edit the tasks. 
 
 features
    - delete - user can delete the task after completion or if any mistake has been made.
