@@ -1,33 +1,36 @@
-//the line waits for the html file to load first
 document.addEventListener("DOMContentLoaded", function () {
-  //assignment of id from html to  a var
     const taskForm = document.getElementById('task-form');
     const taskInput = document.getElementById('task-input');
     const todoList = document.getElementById('todo-list');
 
-    // Load tasks from local storage when the page is loaded
     loadTasks();
-    //function is executed when the form is submited.
+
     taskForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        // Check if the input field is not empty before adding a new task
         if (taskInput.value.trim() !== '') {
-            addTask(taskInput.value);
+            addTask(taskInput.value, false); // Pass 'false' for 'done' initially
             taskInput.value = '';
-
-            // Save tasks to local storage after adding a new task
             saveTasks();
         }
     });
 
-    function addTask(task) {
+    function addTask(task, isDone) {
         const newTask = createTaskElement(task);
+
+        if (isDone) {
+            markTaskAsDone(newTask);
+        }
 
         newTask.appendChild(createDoneButton(newTask));
         newTask.appendChild(createDeleteButton(newTask));
 
         todoList.appendChild(newTask);
+    }
+
+    function markTaskAsDone(taskElement) {
+        const taskText = taskElement.querySelector('.task-text');
+        taskText.style.textDecoration = 'line-through';
     }
 
     function createTaskElement(taskText) {
@@ -49,10 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
         doneBtn.innerText = 'Done';
 
         doneBtn.addEventListener('click', function () {
-            const taskText = taskElement.querySelector('.task-text');
-            taskText.style.textDecoration = 'line-through';
-
-            // Save tasks to local storage after marking a task as done
+            markTaskAsDone(taskElement);
             saveTasks();
         });
 
@@ -66,8 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         deleteBtn.addEventListener('click', function () {
             taskElement.remove();
-
-            // Save tasks to local storage after deleting a task
             saveTasks();
         });
 
@@ -78,18 +76,19 @@ document.addEventListener("DOMContentLoaded", function () {
         const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
         savedTasks.forEach(task => {
-            const newTask = createTaskElement(task);
-            newTask.appendChild(createDoneButton(newTask));
-            newTask.appendChild(createDeleteButton(newTask));
-
-            // Add the new task without applying the line-through style
-            todoList.appendChild(newTask);
+            const [taskText, isDone] = task.split('|');
+            const newTask = createTaskElement(taskText);
+            addTask(taskText, isDone === 'true');
         });
     }
 
     function saveTasks() {
         const tasks = document.querySelectorAll('.task-text');
-        const taskArray = Array.from(tasks).map(task => task.innerText);
+        const taskArray = Array.from(tasks).map(task => {
+            const isDone = task.style.textDecoration === 'line-through';
+            return `${task.innerText}|${isDone}`;
+        });
+
         localStorage.setItem('tasks', JSON.stringify(taskArray));
     }
 });
